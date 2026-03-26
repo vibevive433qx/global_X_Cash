@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #00d632;
+  --color-secondary: #1a1a1a;
+  --color-accent: #ffffff;
+  
+  --animate-bounce-slow: bounce 3s infinite;
+}
+
+:root {
+  --primary: #00d632;
+  --secondary: #1a1a1a;
+}
+
+body {
+  @apply bg-gray-50 text-gray-900 font-sans;
+  margin: 0;
+}
+
+.btn-primary {
+  @apply bg-primary text-white px-6 py-3 rounded-full font-bold transition-all hover:bg-primary/90 active:scale-95;
+}
+
+.btn-secondary {
+  @apply bg-white text-secondary border border-gray-200 px-6 py-3 rounded-full font-bold transition-all hover:bg-gray-100 active:scale-95;
+}
+
+.glass-card {
+  @apply bg-white/80 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl;
+}
